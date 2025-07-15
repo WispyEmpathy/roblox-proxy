@@ -1,0 +1,11 @@
+name = "roblox-proxy"
+main = "index.js"
+compatibility_date = "2025-03-04"
+
+# Fuck off Cloudflare
+workers_dev = false
+send_metrics = false
+
+# Force enable keeping logs
+[observability]
+enabled = true
