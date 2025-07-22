@@ -26,6 +26,7 @@ export default {
 
         function getBadgeIncome(badgeCount) {
             const table = [
+                { count: 5, income: 250 },
                 { count: 15, income: 500 },
                 { count: 30, income: 1000 },
                 { count: 45, income: 1500 },
@@ -34,7 +35,7 @@ export default {
                 { count: 200, income: 4000 },
                 { count: 500, income: 5000 }
             ];
-            if (badgeCount < 15) return 0;
+            if (badgeCount < 5) return 0;
             for (let i = 0; i < table.length - 1; i++) {
                 const curr = table[i], next = table[i + 1];
                 if (badgeCount >= curr.count && badgeCount < next.count) {
