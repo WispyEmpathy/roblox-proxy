@@ -24,28 +24,6 @@ export default {
             }
         };
 
-        function getBadgeIncome(badgeCount) {
-            const table = [
-                { count: 5, income: 250 },
-                { count: 15, income: 500 },
-                { count: 30, income: 1000 },
-                { count: 45, income: 1500 },
-                { count: 60, income: 2000 },
-                { count: 100, income: 3000 },
-                { count: 200, income: 4000 },
-                { count: 500, income: 5000 }
-            ];
-            if (badgeCount < 5) return 0;
-            for (let i = 0; i < table.length - 1; i++) {
-                const curr = table[i], next = table[i + 1];
-                if (badgeCount >= curr.count && badgeCount < next.count) {
-                    const ratio = (badgeCount - curr.count) / (next.count - curr.count);
-                    return curr.income + Math.floor(ratio * (next.income - curr.income));
-                }
-            }
-            return 5000;
-        }
-
         const headers = new Headers();
         headers.set("user-agent", "Mozilla/5.0");
 
@@ -56,7 +34,6 @@ export default {
             const userID = Math.floor(Math.random() * 8986292676) + 1;
             const userUrl = `https://users.roblox.com/v1/users/${userID}`;
             const groupUrl = `https://groups.roblox.com/v2/users/${userID}/groups/roles`;
-            const badgeUrl = `https://badges.roblox.com/v1/users/${userID}/badges?limit=1&sortOrder=Asc`;
 
             const fetchUser = fetch(userUrl, init)
                 .then(async res => {
@@ -74,7 +51,7 @@ export default {
                         }
                     }
 
-                    // Verified badge bonus
+                    // Verified badge bonus (optional, still included for future use)
                     if (userData.hasVerifiedBadge) {
                         income += ExtraValue.VerifiedBadge;
                     }
@@ -96,22 +73,9 @@ export default {
                         }
                     }
 
-                    // Badge bonus
-                    let badgeCount = 0;
-                    try {
-                        const badgeRes = await fetch(badgeUrl, init);
-                        if (badgeRes.ok) {
-                            const badgeTotal = badgeRes.headers.get("roblox-total-result-count");
-                            if (badgeTotal) badgeCount = parseInt(badgeTotal);
-                        }
-                    } catch (_) {}
-
-                    income += getBadgeIncome(badgeCount);
-
                     return {
                         ...userData,
                         income,
-                        badgeCount,
                         groups: groupData.map(g => ({
                             id: g.group.id,
                             name: g.group.name
