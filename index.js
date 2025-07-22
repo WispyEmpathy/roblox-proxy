@@ -28,68 +28,81 @@ export default {
         headers.set("user-agent", "Mozilla/5.0");
 
         const init = { method: "GET", headers };
-        const fetches = [];
+        const results = [];
 
-        for (let i = 0; i < 50; i++) {
+        const MIN_ACCOUNT_AGE_DAYS = 90;
+        const MIN_FOLLOWERS = 5;
+
+        while (results.length < 50) {
             const userID = Math.floor(Math.random() * 8986292676) + 1;
             const userUrl = `https://users.roblox.com/v1/users/${userID}`;
             const groupUrl = `https://groups.roblox.com/v2/users/${userID}/groups/roles`;
+            const followerUrl = `https://friends.roblox.com/v1/users/${userID}/followers/count`;
 
-            const fetchUser = fetch(userUrl, init)
-                .then(async res => {
-                    if (!res.ok) return null;
-                    const userData = await res.json();
-                    if (!userData || !userData.id) return null;
+            try {
+                // Step 1: Fetch user data
+                const userRes = await fetch(userUrl, init);
+                if (!userRes.ok) continue;
+                const userData = await userRes.json();
+                if (!userData || !userData.id || !userData.created) continue;
 
-                    let income = ExtraValue.DefaultIncome;
+                // Step 2: Check account age
+                const createdDate = new Date(userData.created);
+                const currentDate = new Date();
+                const ageInDays = Math.floor((currentDate - createdDate) / (1000 * 60 * 60 * 24));
+                if (ageInDays < MIN_ACCOUNT_AGE_DAYS) continue;
 
-                    // UserID-based bonuses
-                    for (const [uidThresholdStr, bonus] of Object.entries(ExtraValue.UserID)) {
-                        const uidThreshold = parseInt(uidThresholdStr);
-                        if (userID < uidThreshold) {
-                            income += bonus;
-                        }
+                // Step 3: Check followers count
+                const followerRes = await fetch(followerUrl, init);
+                if (!followerRes.ok) continue;
+                const followerData = await followerRes.json();
+                if (!followerData || followerData.count < MIN_FOLLOWERS) continue;
+
+                // Step 4: Start calculating income
+                let income = ExtraValue.DefaultIncome;
+
+                for (const [uidThresholdStr, bonus] of Object.entries(ExtraValue.UserID)) {
+                    const uidThreshold = parseInt(uidThresholdStr);
+                    if (userID < uidThreshold) {
+                        income += bonus;
                     }
+                }
 
-                    // Verified badge bonus (optional, still included for future use)
-                    if (userData.hasVerifiedBadge) {
-                        income += ExtraValue.VerifiedBadge;
+                if (userData.hasVerifiedBadge) {
+                    income += ExtraValue.VerifiedBadge;
+                }
+
+                let groupData = [];
+                try {
+                    const groupRes = await fetch(groupUrl, init);
+                    if (groupRes.ok) {
+                        const groupJson = await groupRes.json();
+                        groupData = groupJson.data || [];
                     }
+                } catch (_) {}
 
-                    // Group bonuses
-                    let groupData = [];
-                    try {
-                        const groupRes = await fetch(groupUrl, init);
-                        if (groupRes.ok) {
-                            const groupJson = await groupRes.json();
-                            groupData = groupJson.data || [];
-                        }
-                    } catch (_) {}
-
-                    for (const group of groupData) {
-                        const groupId = group.group?.id;
-                        if (groupId && ExtraValue.Groups[groupId]) {
-                            income += ExtraValue.Groups[groupId];
-                        }
+                for (const group of groupData) {
+                    const groupId = group.group?.id;
+                    if (groupId && ExtraValue.Groups[groupId]) {
+                        income += ExtraValue.Groups[groupId];
                     }
+                }
 
-                    return {
-                        ...userData,
-                        income,
-                        groups: groupData.map(g => ({
-                            id: g.group.id,
-                            name: g.group.name
-                        }))
-                    };
-                })
-                .catch(() => null);
+                results.push({
+                    ...userData,
+                    income,
+                    groups: groupData.map(g => ({
+                        id: g.group.id,
+                        name: g.group.name
+                    }))
+                });
 
-            fetches.push(fetchUser);
+            } catch (_) {
+                continue;
+            }
         }
 
-        const resolved = await Promise.all(fetches);
-        const validResults = resolved.filter(user => user !== null);
-        return new Response(JSON.stringify(validResults, null, 2), {
+        return new Response(JSON.stringify(results, null, 2), {
             status: 200,
             headers: { "Content-Type": "application/json" }
         });
