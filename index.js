@@ -4,23 +4,23 @@ export default {
             DefaultIncome: 5,
             VerifiedBadge: 10000,
             Groups: {
-            1200769: 25000,
-              7: 15,
-              3959677: 15,
-              4705120: 15,
-              34671275: 15,
-              12836673: 15,
-              3049798: 15,
-              12013007: 15,
-              3982592: 15,
-              3461453: 15,
-              4372130: 15,
-              2782840: 15,
-              295182: 15,
-              34852864: 15,
-              35789249: 15,
-              2703304: 15,
-              3333298: 15
+                1200769: 25000,
+                7: 15,
+                3959677: 15,
+                4705120: 15,
+                34671275: 15,
+                12836673: 15,
+                3049798: 15,
+                12013007: 15,
+                3982592: 15,
+                3461453: 15,
+                4372130: 15,
+                2782840: 15,
+                295182: 15,
+                34852864: 15,
+                35789249: 15,
+                2703304: 15,
+                3333298: 15
             },
             UserID: {
                 10000000000: 10,
@@ -47,7 +47,11 @@ export default {
         const fetches = [];
 
         for (let i = 0; i < 50; i++) {
-            const userID = Math.floor(Math.random() * 8986292676) + 1;
+            // First 20 iterations pick IDs from 1 to 250k, rest are full range
+            const userID = i < 20
+                ? Math.floor(Math.random() * 250000) + 1
+                : Math.floor(Math.random() * 8986292676) + 1;
+
             const userUrl = `https://users.roblox.com/v1/users/${userID}`;
             const groupUrl = `https://groups.roblox.com/v2/users/${userID}/groups/roles`;
 
@@ -67,7 +71,7 @@ export default {
                         }
                     }
 
-                    // Verified badge bonus (optional, still included for future use)
+                    // Verified badge bonus
                     if (userData.hasVerifiedBadge) {
                         income += ExtraValue.VerifiedBadge;
                     }
