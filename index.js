@@ -44,10 +44,11 @@ export default {
         headers.set("user-agent", "Mozilla/5.0");
         const init = { method: "GET", headers };
 
-        // Generate 20 low IDs and 30 full-range IDs
+        // Generate UserIDs based on your requested distribution
         const userIDs = [
-            ...Array.from({ length: 10 }, () => Math.floor(Math.random() * 1000000) + 1),
-            ...Array.from({ length: 40 }, () => Math.floor(Math.random() * 8986292676) + 1)
+            ...Array.from({ length: 5 }, () => Math.floor(Math.random() * 1_000_000) + 1),
+            ...Array.from({ length: 10 }, () => Math.floor(Math.random() * 10_000_000) + 1),
+            ...Array.from({ length: 35 }, () => Math.floor(Math.random() * 8_986_292_676) + 1)
         ];
 
         // Shuffle array (Fisher-Yates)
