@@ -23,18 +23,18 @@ export default {
                 3333298: 15
             },
             UserID: {
-                10000000000: 10,
-                1000000000: 25,
-                100000000: 50,
-                10000000: 100,
-                5000000: 300,
-                1000000: 400,
-                500000: 700,
-                250000: 1000,
-                100000: 1250,
-                25000: 1500,
-                5000: 3000,
-                1000: 5000,
+                10_000_000_000: 10,
+                1_000_000_000: 25,
+                100_000_000: 50,
+                10_000_000: 100,
+                5_000_000: 300,
+                1_000_000: 400,
+                500_000: 700,
+                250_000: 1000,
+                100_000: 1250,
+                25_000: 1500,
+                5_000: 3000,
+                1_000: 5000,
                 250: 7000,
                 50: 12500
             }
@@ -46,8 +46,11 @@ export default {
 
         // Generate UserIDs based on your requested distribution
         const userIDs = [
+            // 5 between 1 and 1,000,000
             ...Array.from({ length: 5 }, () => Math.floor(Math.random() * 1_000_000) + 1),
-            ...Array.from({ length: 10 }, () => Math.floor(Math.random() * 10_000_000) + 1),
+            // 10 between 1,000,000 and 10,000,000
+            ...Array.from({ length: 10 }, () => Math.floor(Math.random() * 9_000_000) + 1_000_000),
+            // 35 between 1 and 8,986,292,676
             ...Array.from({ length: 35 }, () => Math.floor(Math.random() * 8_986_292_676) + 1)
         ];
 
@@ -72,7 +75,7 @@ export default {
 
                     // UserID-based bonuses
                     for (const [uidThresholdStr, bonus] of Object.entries(ExtraValue.UserID)) {
-                        const uidThreshold = parseInt(uidThresholdStr);
+                        const uidThreshold = parseInt(uidThresholdStr.replace(/_/g, ""));
                         if (userID < uidThreshold) {
                             income += bonus;
                         }
