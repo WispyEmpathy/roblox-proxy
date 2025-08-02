@@ -46,8 +46,8 @@ export default {
 
         // Generate 20 low IDs and 30 full-range IDs
         const userIDs = [
-            ...Array.from({ length: 20 }, () => Math.floor(Math.random() * 1000000) + 1),
-            ...Array.from({ length: 30 }, () => Math.floor(Math.random() * 8986292676) + 1)
+            ...Array.from({ length: 10 }, () => Math.floor(Math.random() * 1000000) + 1),
+            ...Array.from({ length: 40 }, () => Math.floor(Math.random() * 8986292676) + 1)
         ];
 
         // Shuffle array (Fisher-Yates)
