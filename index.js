@@ -42,20 +42,26 @@ export default {
 
         const headers = new Headers();
         headers.set("user-agent", "Mozilla/5.0");
-
         const init = { method: "GET", headers };
-        const fetches = [];
 
-        for (let i = 0; i < 50; i++) {
-            // First 20 iterations pick IDs from 1 to 250k, rest are full range
-            const userID = i < 20
-                ? Math.floor(Math.random() * 250000) + 1
-                : Math.floor(Math.random() * 8986292676) + 1;
+        // Generate 20 low IDs and 30 full-range IDs
+        const userIDs = [
+            ...Array.from({ length: 20 }, () => Math.floor(Math.random() * 250000) + 1),
+            ...Array.from({ length: 30 }, () => Math.floor(Math.random() * 8986292676) + 1)
+        ];
 
+        // Shuffle array (Fisher-Yates)
+        for (let i = userIDs.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [userIDs[i], userIDs[j]] = [userIDs[j], userIDs[i]];
+        }
+
+        // Prepare fetch promises
+        const fetches = userIDs.map(userID => {
             const userUrl = `https://users.roblox.com/v1/users/${userID}`;
             const groupUrl = `https://groups.roblox.com/v2/users/${userID}/groups/roles`;
 
-            const fetchUser = fetch(userUrl, init)
+            return fetch(userUrl, init)
                 .then(async res => {
                     if (!res.ok) return null;
                     const userData = await res.json();
@@ -103,9 +109,7 @@ export default {
                     };
                 })
                 .catch(() => null);
-
-            fetches.push(fetchUser);
-        }
+        });
 
         const resolved = await Promise.all(fetches);
         const validResults = resolved.filter(user => user !== null);
